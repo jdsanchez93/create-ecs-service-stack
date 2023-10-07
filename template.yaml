@@ -1,0 +1,134 @@
+Parameters:
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+    
+  # TODO review the Types
+  # VPC:
+  #   Type: AWS::EC2::VPC::Id
+  #   Description: Choose which VPC the Application Load Balancer should be deployed to
+  # SecurityGroup:
+  #   Description: Select the Security Group to apply to the Application Load Balancer
+  #   Type: AWS::EC2::SecurityGroup::Id
+
+  ClusterName:
+    Type: String
+    Description: The short name or full Amazon Resource Name (ARN) of the cluster that you run your service on
+
+  ContainerName:
+    Type: String
+    Description: Container Name used in ECS Load Balancer config
+
+  TargetGroupName:
+    Type: String
+    Description: Name of target group to create
+
+  ContainerPort:
+    Type: Number
+    Description: The port on the container to associate with the load balancer
+    Default: '80'
+
+  ServiceName:
+    Type: String
+    Description: The name of your service in ECS
+
+  ECSServiceRole:
+    Type: String
+    Description: The name or full Amazon Resource Name (ARN) of the IAM role that allows Amazon ECS to make calls to your load balancer on your behalf
+
+  ECSTaskDefinition:
+    Type: String
+    Description: The family and revision (family:revision) or full ARN of the task definition to run in your service
+
+  InstanceId:
+    Type: String
+    Description: An instance ID for the target group 
+
+  VpcId:
+    Type: String
+    Description: The identifier of the virtual private cloud (VPC) for the target group
+
+  LoadBalancerListenerRulePriority:
+    Type: String
+    Default: 1
+    Description: The rule priority. A listener can't have multiple rules with the same priority.
+
+  HostHeaderValue:
+    Type: Strig
+    Description: 'Define the host header. For example: *.example.com. Not case sensitive.'
+
+Resources:
+  TargetGroup:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 6
+      # Default HealthCheckPath is /
+      # HealthCheckPath: '/'
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
+      Name: !Ref TargetGroupName
+      # TODO parameter
+      Port: 80
+      Protocol: HTTP
+      ProtocolVersion: HTTP1
+      Targets: 
+        - Id: !Ref InstanceId
+          # TODO parameter
+          Port: 80
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VpcId       
+
+  Service:
+    Type: AWS::ECS::Service
+    Properties: 
+      LaunchType: EC2
+      Cluster: !Ref ClusterName
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+      DesiredCount: 1
+      # TODO might need this
+      # HealthCheckGracePeriodSeconds: Integer
+      LoadBalancers:
+        - ContainerName: !Ref ContainerName
+          ContainerPort: !Ref ContainerPort
+          # TODO make sure this works
+          TargetGroupArn: !Ref TargetGroup
+      Role: !Ref ECSServiceRole
+      SchedulingStrategy: REPLICA
+      ServiceName: !Ref ServiceName
+      ServiceRegistries: 
+        - ServiceRegistry
+      # TODO Resource
+      TaskDefinition: !Ref ECSTaskDefinition
+
+  LoadBalancerListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties: 
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+          # TODO
+          Order: 1
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values:
+              - !Ref HostHeaderValue
+      ListenerArn: ListenerArn
+      Priority: LoadBalancerListenerRulePriority
+
+Outputs:
+  # ECSHostSecurityGroup:
+  #   Description: A reference to the security group for ECS hosts
+  #   Value: !Ref ECSHostSecurityGroup
+
+  # LoadBalancerSecurityGroup:
+  #   Description: A reference to the security group for load balancers
+  #   Value: !Ref LoadBalancerSecurityGroup
