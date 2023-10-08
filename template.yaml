@@ -1,8 +1,4 @@
 Parameters:
-  EnvironmentName:
-    Description: An environment name that will be prefixed to resource names
-    Type: String
-    
   # TODO review the Types
   # VPC:
   #   Type: AWS::EC2::VPC::Id
@@ -49,13 +45,17 @@ Parameters:
     Description: The identifier of the virtual private cloud (VPC) for the target group
 
   LoadBalancerListenerRulePriority:
-    Type: String
+    Type: Number
     Default: 1
     Description: The rule priority. A listener can't have multiple rules with the same priority.
 
   HostHeaderValue:
-    Type: Strig
+    Type: String
     Description: 'Define the host header. For example: *.example.com. Not case sensitive.'
+
+  ListenerArn:
+    Type: String
+    Description: The Amazon Resource Name (ARN) of the listener.
 
 Resources:
   TargetGroup:
@@ -81,6 +81,21 @@ Resources:
       UnhealthyThresholdCount: 2
       VpcId: !Ref VpcId       
 
+  LoadBalancerListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties: 
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+          Order: 1
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values:
+              - !Ref HostHeaderValue
+      ListenerArn: !Ref ListenerArn
+      Priority: !Ref LoadBalancerListenerRulePriority
+
   Service:
     Type: AWS::ECS::Service
     Properties: 
@@ -98,37 +113,9 @@ Resources:
       LoadBalancers:
         - ContainerName: !Ref ContainerName
           ContainerPort: !Ref ContainerPort
-          # TODO make sure this works
           TargetGroupArn: !Ref TargetGroup
       Role: !Ref ECSServiceRole
       SchedulingStrategy: REPLICA
       ServiceName: !Ref ServiceName
-      ServiceRegistries: 
-        - ServiceRegistry
       # TODO Resource
       TaskDefinition: !Ref ECSTaskDefinition
-
-  LoadBalancerListenerRule:
-    Type: AWS::ElasticLoadBalancingV2::ListenerRule
-    Properties: 
-      Actions:
-        - Type: forward
-          TargetGroupArn: !Ref TargetGroup
-          # TODO
-          Order: 1
-      Conditions:
-        - Field: host-header
-          HostHeaderConfig:
-            Values:
-              - !Ref HostHeaderValue
-      ListenerArn: ListenerArn
-      Priority: LoadBalancerListenerRulePriority
-
-Outputs:
-  # ECSHostSecurityGroup:
-  #   Description: A reference to the security group for ECS hosts
-  #   Value: !Ref ECSHostSecurityGroup
-
-  # LoadBalancerSecurityGroup:
-  #   Description: A reference to the security group for load balancers
-  #   Value: !Ref LoadBalancerSecurityGroup
