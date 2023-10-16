@@ -75,8 +75,8 @@ Resources:
       ProtocolVersion: HTTP1
       Targets: 
         - Id: !Ref InstanceId
-          # TODO parameter
-          Port: 80
+          # TODO this is not needed right
+          # Port: 80
       TargetType: instance
       UnhealthyThresholdCount: 2
       VpcId: !Ref VpcId       
