@@ -79,7 +79,10 @@ Resources:
           # Port: 80
       TargetType: instance
       UnhealthyThresholdCount: 2
-      VpcId: !Ref VpcId       
+      VpcId: !Ref VpcId     
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: '30'
 
   LoadBalancerListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
