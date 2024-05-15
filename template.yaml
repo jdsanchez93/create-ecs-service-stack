@@ -101,6 +101,7 @@ Resources:
 
   Service:
     Type: AWS::ECS::Service
+    DependsOn: LoadBalancerListenerRule
     Properties: 
       LaunchType: EC2
       Cluster: !Ref ClusterName
