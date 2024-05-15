@@ -12,3 +12,16 @@ capabilities = "CAPABILITY_IAM"
 parameter_overrides = "ClusterName=\"ProjectsProd\" ContainerName=\"webcam-image-viewer\" TargetGroupName=\"webcam-image-viewer-target-group\" ContainerPort=\"80\" ServiceName=\"webcam-image-viewer\" ECSServiceRole=\"arn:aws:iam::515964707541:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS\" ECSTaskDefinition=\"arn:aws:ecs:us-east-2:515964707541:task-definition/webcam-image-viewer-task:3\" InstanceId=\"i-0932b09dd009de6d8\" VpcId=\"vpc-02290b88ca7862ff4\" LoadBalancerListenerRulePriority=\"1\" HostHeaderValue=\"webcam.jd-sanchez.com\" ListenerArn=\"arn:aws:elasticloadbalancing:us-east-2:515964707541:listener/app/ecs-projects-prod-alb/363583489910e87d/f212e4292ddea1e2\""
 image_repositories = []
 disable_rollback = true
+
+[pet-sitter-prod]
+[pet-sitter-prod.deploy]
+[pet-sitter-prod.deploy.parameters]
+stack_name = "pet-sitter-prod"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-10pf1mgfxlyxe"
+s3_prefix = "pet-sitter-prod"
+region = "us-east-2"
+profile = "create-ecs-service-stack"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "ClusterName=\"ProjectsProd\" ContainerName=\"pet-sitter\" TargetGroupName=\"pet-sitter-target-group\" ContainerPort=\"80\" ServiceName=\"pet-sitter\" ECSServiceRole=\"arn:aws:iam::515964707541:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS\" ECSTaskDefinition=\"arn:aws:ecs:us-east-2:515964707541:task-definition/pet-sitter-task:2\" InstanceId=\"i-0932b09dd009de6d8\" VpcId=\"vpc-02290b88ca7862ff4\" LoadBalancerListenerRulePriority=\"2\" HostHeaderValue=\"pet-sitter.jd-sanchez.com\" ListenerArn=\"arn:aws:elasticloadbalancing:us-east-2:515964707541:listener/app/ecs-projects-prod-alb/363583489910e87d/f212e4292ddea1e2\""
+image_repositories = []
